@@ -44,9 +44,9 @@ class DataStandardizer:
         # Ahora intentamos una consulta más segura que solo selecciona idempleado
         # y los campos que probablemente existan
         query = text("""
-            SELECT e.idempleado, e.*, 'Activo' as estado
-            FROM u.empleados e
-        """)
+                    SELECT e.*, 'Activo' as estado
+                    FROM gmadministracion.empleados e
+                    """)
         try:
             with self.engine.connect() as connection:
                 result = connection.execute(query)
