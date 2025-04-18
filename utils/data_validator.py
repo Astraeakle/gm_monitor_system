@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+
 class DataValidator:
     @staticmethod
     def validate_date_format(date_str, format='%Y-%m-%d'):
@@ -10,7 +11,7 @@ class DataValidator:
             return True
         except ValueError:
             return False
-    
+
     @staticmethod
     def validate_time_format(time_str, format='%H:%M:%S'):
         """Valida que una cadena tenga el formato de hora correcto"""
@@ -19,34 +20,34 @@ class DataValidator:
             return True
         except ValueError:
             return False
-    
+
     @staticmethod
     def validate_email(email):
         """Valida un formato de correo electronico"""
         pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
         return bool(re.match(pattern, email))
-    
+
     @staticmethod
     def validate_non_empty(value):
-        """Valida que un valor no esté vacío"""
+        """Valida que un valor no este vacío"""
         if value is None:
             return False
         if isinstance(value, str) and value.strip() == '':
             return False
         return True
-    
+
     @staticmethod
     def validate_numeric(value):
-        """Valida que un valor sea numérico"""
+        """Valida que un valor sea numerico"""
         try:
             float(value)
             return True
         except (ValueError, TypeError):
             return False
-    
+
     @staticmethod
     def validate_range(value, min_val, max_val):
-        """Valida que un valor esté dentro de un rango"""
+        """Valida que un valor este dentro de un rango"""
         try:
             num_val = float(value)
             return min_val <= num_val <= max_val

@@ -244,7 +244,7 @@ class DataStandardizer:
             empleados_columns = df_empleados.columns.tolist()
             join_columns = ['idempleado']
 
-            # Determinar qué columnas podemos usar basado en lo que existe
+            # Determinar que columnas podemos usar basado en lo que existe
             if 'nombre' in empleados_columns:
                 join_columns.append('nombre')
             elif 'nombres' in empleados_columns:
@@ -269,7 +269,7 @@ class DataStandardizer:
                 how='left'
             )
 
-            # Agregar métricas de entregables si existen
+            # Agregar metricas de entregables si existen
             if not df_entregables_std.empty:
                 # Agrupar entregables por empleado y actividad
                 df_entregables_agg = df_entregables_std.groupby(['id_empleado', 'id_actividad']).agg({
@@ -293,7 +293,7 @@ class DataStandardizer:
             return df_unified
 
     def run(self):
-        """Método de ejecución principal para estandarizar datos y crear un conjunto de datos unificado"""
+        """Metodo de ejecución principal para estandarizar datos y crear un conjunto de datos unificado"""
         print("Ejecutando proceso de estandarización de datos...")
         # Crear dataset unificado
         df_unified = self.create_unified_dataset()

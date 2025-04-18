@@ -10,7 +10,7 @@ class MonitoringPrinciples:
                 "No requiere vigilancia directa ni capturas de pantalla continuas.",
                 "Permite tomar decisiones basadas en datos objetivos.",
                 "Fomenta un entorno de confianza y eficiencia.",
-                "Prioriza métricas de resultado sobre microgestión del proceso."
+                "Prioriza metricas de resultado sobre microgestión del proceso."
             ]
         }
         return principles
