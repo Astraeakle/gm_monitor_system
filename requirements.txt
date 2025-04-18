@@ -1,0 +1,7 @@
+mysql-connector-python==8.0.32
+pandas==2.0.0
+sqlalchemy==2.0.12
+matplotlib==3.7.1
+seaborn==0.12.2
+pymysql==1.0.3
+python-dotenv==1.0.0
