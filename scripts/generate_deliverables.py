@@ -37,10 +37,11 @@ def generate_kpi_document():
         f.write(
             f"Generado el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
+        # KPI 1: Horas trabajadas
         f.write("## 1. Horas Trabajadas\n\n")
 
-        # KPI: Horas trabajadas por empleado
         if 'horas_trabajadas' in df.columns and 'id_empleado' in df.columns:
+            # Por empleado
             horas_por_empleado = df.groupby('id_empleado')[
                 'horas_trabajadas'].sum().reset_index()
             horas_por_empleado = horas_por_empleado.sort_values(
@@ -48,7 +49,7 @@ def generate_kpi_document():
 
             f.write("### 1.1 Total de Horas Trabajadas por Empleado\n\n")
             f.write("| ID Empleado | Horas Totales |\n")
-            f.write("|-------------|---------------|\n")
+            f.write("|------------|---------------|\n")
 
             for _, row in horas_por_empleado.iterrows():
                 f.write(
@@ -56,68 +57,114 @@ def generate_kpi_document():
 
             f.write("\n")
 
-        # KPI: Horas trabajadas por proyecto
-        if 'horas_trabajadas' in df.columns and 'id_proyecto' in df.columns:
-            horas_por_proyecto = df.groupby(['id_proyecto', 'nombre_proyecto'])[
-                'horas_trabajadas'].sum().reset_index()
-            horas_por_proyecto = horas_por_proyecto.sort_values(
-                'horas_trabajadas', ascending=False)
+            # Mostrar estadísticas generales
+            media_horas = horas_por_empleado['horas_trabajadas'].mean()
+            max_horas = horas_por_empleado['horas_trabajadas'].max()
+            min_horas = horas_por_empleado['horas_trabajadas'].min()
 
-            f.write("### 1.2 Total de Horas Trabajadas por Proyecto\n\n")
-            f.write("| ID Proyecto | Nombre Proyecto | Horas Totales |\n")
-            f.write("|-------------|-----------------|---------------|\n")
+            f.write("### 1.2 Estadísticas de Horas Trabajadas\n\n")
+            f.write(
+                f"- **Promedio de horas trabajadas por empleado:** {media_horas:.2f}\n")
+            f.write(
+                f"- **Máximo de horas trabajadas por un empleado:** {max_horas:.2f}\n")
+            f.write(
+                f"- **Mínimo de horas trabajadas por un empleado:** {min_horas:.2f}\n\n")
 
-            for _, row in horas_por_proyecto.iterrows():
+            # Por proyecto
+            if 'nombre_proyecto' in df.columns:
+                horas_por_proyecto = df.groupby(['id_proyecto', 'nombre_proyecto'])[
+                    'horas_trabajadas'].sum().reset_index()
+                horas_por_proyecto = horas_por_proyecto.sort_values(
+                    'horas_trabajadas', ascending=False)
+
+                f.write("### 1.3 Total de Horas Trabajadas por Proyecto\n\n")
+                f.write("| ID Proyecto | Nombre Proyecto | Horas Totales |\n")
+                f.write("|------------|----------------|---------------|\n")
+
+                for _, row in horas_por_proyecto.iterrows():
+                    f.write(
+                        f"| {row['id_proyecto']} | {row['nombre_proyecto']} | {row['horas_trabajadas']:.2f} |\n")
+
+                f.write("\n")
+
+        # KPI 2: Calidad de entregables
+        f.write("## 2. Calidad de Entregables\n\n")
+
+        # Entregables rechazados
+        if 'entregables_rechazados' in df.columns and 'id_empleado' in df.columns:
+            rechazos_por_empleado = df.groupby(
+                'id_empleado')['entregables_rechazados'].sum().reset_index()
+            rechazos_por_empleado = rechazos_por_empleado.sort_values(
+                'entregables_rechazados', ascending=False)
+
+            f.write("### 2.1 Entregables Rechazados por Empleado\n\n")
+            f.write("| ID Empleado | Entregables Rechazados |\n")
+            f.write("|------------|------------------------|\n")
+
+            for _, row in rechazos_por_empleado.iterrows():
                 f.write(
-                    f"| {row['id_proyecto']} | {row['nombre_proyecto']} | {row['horas_trabajadas']:.2f} |\n")
+                    f"| {row['id_empleado']} | {int(row['entregables_rechazados'])} |\n")
 
             f.write("\n")
 
-        f.write("## 2. Calidad de Entregables\n\n")
+        # Tasa de rechazo
+        if 'tasa_rechazo' in df.columns and 'id_empleado' in df.columns:
+            tasa_por_empleado = df.groupby('id_empleado')[
+                'tasa_rechazo'].mean().reset_index()
+            tasa_por_empleado = tasa_por_empleado.sort_values(
+                'tasa_rechazo', ascending=False)
 
-        # KPI: Entregables rechazados
-        if 'estado' in df.columns:
-            try:
-                # Verificar si existe la columna estado y tiene los valores esperados
-                entregables_status = df['estado'].value_counts().reset_index()
-                entregables_status.columns = ['Estado', 'Cantidad']
+            f.write("### 2.2 Tasa de Rechazo por Empleado (%)\n\n")
+            f.write("| ID Empleado | Tasa de Rechazo (%) |\n")
+            f.write("|------------|---------------------|\n")
 
-                f.write("### 2.1 Estado de Entregables\n\n")
-                f.write("| Estado | Cantidad |\n")
-                f.write("|--------|----------|\n")
-
-                for _, row in entregables_status.iterrows():
-                    f.write(f"| {row['Estado']} | {row['Cantidad']} |\n")
-
-                f.write("\n")
-            except:
+            for _, row in tasa_por_empleado.iterrows():
                 f.write(
-                    "No se pudieron calcular metricas de estado de entregables.\n\n")
+                    f"| {row['id_empleado']} | {row['tasa_rechazo']:.2f}% |\n")
 
-        # Indicadores adicionales si existen
-        if 'eficiencia' in df.columns:
-            f.write("## 3. Eficiencia\n\n")
+            f.write("\n")
 
-            eficiencia_media = df['eficiencia'].mean()
-            eficiencia_max = df['eficiencia'].max()
-            eficiencia_min = df['eficiencia'].min()
+        # KPI 3: Productividad
+        f.write("## 3. Productividad\n\n")
 
-            f.write(f"- Eficiencia promedio: {eficiencia_media:.4f}\n")
-            f.write(f"- Eficiencia máxima: {eficiencia_max:.4f}\n")
-            f.write(f"- Eficiencia mínima: {eficiencia_min:.4f}\n\n")
+        if 'horas_trabajadas' in df.columns and 'total_entregables' in df.columns:
+            # Calcular entregables por hora
+            df_prod = df.copy()
+            df_prod['entregables_por_hora'] = df_prod.apply(
+                lambda x: x['total_entregables'] /
+                x['horas_trabajadas'] if x['horas_trabajadas'] > 0 else 0,
+                axis=1
+            )
 
+            prod_por_empleado = df_prod.groupby(
+                'id_empleado')['entregables_por_hora'].mean().reset_index()
+            prod_por_empleado = prod_por_empleado.sort_values(
+                'entregables_por_hora', ascending=False)
+
+            f.write("### 3.1 Entregables por Hora Trabajada\n\n")
+            f.write("| ID Empleado | Entregables por Hora |\n")
+            f.write("|------------|----------------------|\n")
+
+            for _, row in prod_por_empleado.iterrows():
+                f.write(
+                    f"| {row['id_empleado']} | {row['entregables_por_hora']:.2f} |\n")
+
+            f.write("\n")
+
+        # Conclusiones y recomendaciones
         f.write("## 4. Conclusiones y Recomendaciones\n\n")
         f.write(
             "- Se recomienda establecer metas de horas productivas por empleado y proyecto.\n")
-        f.write("- Implementar revisiones periodicas de la calidad de entregables.\n")
+        f.write("- Implementar revisiones periódicas de la calidad de entregables.\n")
         f.write(
-            "- Definir acciones correctivas para mejorar la tasa de aprobacion de entregables.\n")
+            "- Definir acciones correctivas para mejorar la tasa de aprobación de entregables.\n")
         f.write(
             "- Crear un sistema de recompensas para los empleados con mayor eficiencia.\n")
+        f.write(
+            "- Establecer umbrales de alerta para tasas de rechazo superiores al 15%.\n")
 
     print(f"Documento de KPIs generado exitosamente: {kpi_file}")
     return kpi_file
-
 
 if __name__ == "__main__":
     generate_kpi_document()

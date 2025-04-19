@@ -216,6 +216,7 @@ class DataStandardizer:
 
         return df_entregables
 
+
     def create_unified_dataset(self):
         """Crea un dataset unificado de actividades remotas"""
         # Obtener datos
@@ -238,13 +239,11 @@ class DataStandardizer:
                 how='left'
             )
 
-            # Paso 3: Modificar la parte que usa estos campos en create_unified_dataset()
-            # Actualiza el codigo que hace merge con los datos de empleados:
-            # Ajustar el codigo de merge con los datos que realmente existen
+            # Ajustar el código de merge con los datos de empleados
             empleados_columns = df_empleados.columns.tolist()
             join_columns = ['idempleado']
 
-            # Determinar que columnas podemos usar basado en lo que existe
+            # Determinar qué columnas podemos usar basado en lo que existe
             if 'nombre' in empleados_columns:
                 join_columns.append('nombre')
             elif 'nombres' in empleados_columns:
@@ -260,7 +259,7 @@ class DataStandardizer:
             if 'email' in empleados_columns:
                 join_columns.append('email')
 
-            # Ahora hacemos el merge con solo las columnas disponibles
+            # Hacer el merge con solo las columnas disponibles
             df_unified = pd.merge(
                 df_unified,
                 df_empleados[join_columns],
@@ -269,7 +268,7 @@ class DataStandardizer:
                 how='left'
             )
 
-            # Agregar metricas de entregables si existen
+            # Agregar métricas de entregables si existen
             if not df_entregables_std.empty:
                 # Agrupar entregables por empleado y actividad
                 df_entregables_agg = df_entregables_std.groupby(['id_empleado', 'id_actividad']).agg({
@@ -283,6 +282,22 @@ class DataStandardizer:
                     'calidad_promedio', 'entregables_aprobados'
                 ]
 
+                # Calcular entregables rechazados
+                rechazados = df_entregables_std[df_entregables_std['estado'] == 'Rechazado'].groupby(
+                    ['id_empleado', 'id_actividad']).size().reset_index(name='entregables_rechazados')
+
+                if not rechazados.empty:
+                    df_entregables_agg = pd.merge(
+                        df_entregables_agg,
+                        rechazados,
+                        on=['id_empleado', 'id_actividad'],
+                        how='left'
+                    )
+                    df_entregables_agg['entregables_rechazados'] = df_entregables_agg['entregables_rechazados'].fillna(
+                        0)
+                else:
+                    df_entregables_agg['entregables_rechazados'] = 0
+
                 df_unified = pd.merge(
                     df_unified,
                     df_entregables_agg,
@@ -290,8 +305,17 @@ class DataStandardizer:
                     how='left'
                 )
 
+                # Calcular tasa de rechazo
+                df_unified['tasa_rechazo'] = df_unified.apply(
+                    lambda x: x['entregables_rechazados'] /
+                    x['total_entregables'] * 100
+                    if pd.notnull(x.get('total_entregables')) and x.get('total_entregables') > 0
+                    else 0, axis=1
+                )
+
             return df_unified
 
+        return pd.DataFrame()
     def run(self):
         """Metodo de ejecución principal para estandarizar datos y crear un conjunto de datos unificado"""
         print("Ejecutando proceso de estandarización de datos...")
@@ -306,9 +330,7 @@ class DataStandardizer:
             print("No se pudo crear el dataset unificado")
             return None
 
-        return pd.DataFrame()
-
-
+    
 if __name__ == "__main__":
     standardizer = DataStandardizer()
     standardizer.run()
