@@ -1,6 +1,7 @@
 from utils.principles import MonitoringPrinciples
 from scripts.generate_deliverables import generate_kpi_document
 from scripts.insert_test_data import verify_data_exists
+from scripts.sql_metrics import run_metrics_report
 from tests.test_connection import test_mysql_connection
 from scripts.data_standardization import DataStandardizer
 import os
@@ -70,10 +71,13 @@ def main():
         print("\nEntregables generados:")
         print(f"- Documento de KPIs: {os.path.basename(kpi_doc)}")
         print(f"- Dataset unificado: {os.path.basename(dataset_file)}")
+
     else:
         print(
             "\n[ERROR] No se pudo completar el proceso debido a errores en los datos.")
 
-
+    print("\n5. Generando métricas SQL de productividad...")
+    metrics_results = run_metrics_report()
+    
 if __name__ == "__main__":
     main()

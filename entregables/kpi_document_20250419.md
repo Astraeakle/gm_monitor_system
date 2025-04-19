@@ -1,6 +1,6 @@
 # Documento de KPIs - Sistema de Monitoreo de Productividad
 
-Generado el: 2025-04-19 13:57:39
+Generado el: 2025-04-19 17:08:47
 
 ## 1. Horas Trabajadas
 
